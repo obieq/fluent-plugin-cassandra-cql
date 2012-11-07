@@ -2,7 +2,8 @@
 
 Cassandra output plugin for Fluentd.
 
-Implemented using the cassandra-cql gem and targets CQL version 3.0.0
+Implemented using the cassandra-cql gem and targets CQL 3.0.0
+and Cassandra 1.1.x
 
 # Raison d'être
 Currently, there's another Fluentd Cassandra plugin [see
@@ -14,6 +15,12 @@ It's implemented via the Twitter Cassandra gem, which:
     b) doesn't allow a desktop client to make a call to a Cassandra instance hosted on EC2
        (the gem resolves a cassandra node's IP address to its private EC2
         IP address (ex: 10.x.x.x), which isn't accessible outside EC2)
+
+# Installation
+
+via RubyGems
+
+    gem install fluent-plugin-cassandra-cql
 
 # Quick Start
 
@@ -34,5 +41,10 @@ It's implemented via the Twitter Cassandra gem, which:
       columnfamily events        # cassandra column family
       ttl 60                     # cassandra ttl *optional => default is 0*
     </match>
+
+# Tests
+
+rake rspec
+    NOTE: requires that cassandra be installed on the machine running the tests
 
 # TODOs
