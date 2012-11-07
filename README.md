@@ -45,6 +45,10 @@ via RubyGems
 # Tests
 
 rake rspec
-    NOTE: requires that cassandra be installed on the machine running the tests
+
+NOTE: requires that cassandra be installed on the machine running the tests
 
 # TODOs
+    1) make host and port configurable for tests
+    2) make schema definition configurable
+    3) add rake task to generate keyspace and columnfamily
