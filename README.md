@@ -13,13 +13,14 @@ It's implemented via the Twitter Cassandra gem, which:
 
 # Quick Start
 
-== Configuration
-  <match cassandra.**>
-    type cassandra
-    host ec2-54-242-143-253.compute-1.amazonaws.com            # cassandra's hostname. default localhost
-    port 9160                                                  # cassandra's thrft port. default 9160
-    keyspace FluentdLoggers                                    # cassandra keyspace
-    columnfamily events                                        # cassandra column family
-  </match>
+## Configuration
+    # fluentd.conf
+      <match cassandra.**>
+        type cassandra
+        host ec2-54-242-143-253.compute-1.amazonaws.com            # cassandra's hostname. default localhost
+        port 9160                                                  # cassandra's thrft port. default 9160
+        keyspace FluentdLoggers                                    # cassandra keyspace
+        columnfamily events                                        # cassandra column family
+      </match>
 
 # TODOs
