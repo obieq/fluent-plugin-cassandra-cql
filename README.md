@@ -17,14 +17,22 @@ It's implemented via the Twitter Cassandra gem, which:
 
 # Quick Start
 
-## Configuration
-    # fluentd.conf
-      <match cassandra.**>
-        type cassandra
-        host ec2-54-242-143-253.compute-1.amazonaws.com            # cassandra's hostname. default localhost
-        port 9160                                                  # cassandra's thrft port. default 9160
-        keyspace FluentdLoggers                                    # cassandra keyspace
-        columnfamily events                                        # cassandra column family
-      </match>
+## Cassandra Configuration
+    # create keyspace (via CQL)
+      CREATE KEYSPACE \"FluentdLoggers\" WITH strategy_class='org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor=1;
+
+    # create table (column family)
+      CREATE TABLE events (id varchar, ts bigint, payload text, PRIMARY KEY (id, ts)) WITH CLUSTERING ORDER BY (ts DESC);
+      
+
+## Fluentd.conf Configuration
+    <match cassandra.**>
+      type cassandra
+      host 127.0.0.1             # cassandra hostname.
+      port 9160                  # cassandra thrft port.
+      keyspace FluentdLoggers    # cassandra keyspace
+      columnfamily events        # cassandra column family
+      ttl 60                     # cassandra ttl *optional => default is 0*
+    </match>
 
 # TODOs
