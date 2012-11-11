@@ -34,7 +34,7 @@ via RubyGems
 
 ## Fluentd.conf Configuration
     <match cassandra.**>
-      type cassandra
+      type cassandra-cql
       host 127.0.0.1             # cassandra hostname.
       port 9160                  # cassandra thrft port.
       keyspace FluentdLoggers    # cassandra keyspace
