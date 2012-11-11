@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "fluent-plugin-cassandra-cql"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["obie quelland"]
-  s.date = "2012-11-07"
+  s.date = "2012-11-11"
   s.description = "Fluent output plugin for Cassandra via CQL version 3.0.0"
   s.email = "quelland@gmail.com"
   s.extra_rdoc_files = [
@@ -28,7 +28,8 @@ Gem::Specification.new do |s|
     "lib/fluent/plugin/out_cassandra.rb",
     "spec/cassandra_output_spec.rb",
     "spec/spec.opts",
-    "spec/spec_helper.rb"
+    "spec/spec_helper.rb",
+    "spec/support/helpers.rb"
   ]
   s.homepage = "http://github.com/obieq/fluent-plugin-cassandra-cql"
   s.licenses = ["MIT"]
