@@ -6,4 +6,4 @@ require 'fluent/test'
 Dir["./lib/**/*.rb"].each {|f| require f}
 
 # require the shared example files
-#Dir["./spec/support/**/*.rb"].each {|f| require f}
+Dir["./spec/support/**/*.rb"].each {|f| require f}

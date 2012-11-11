@@ -2,12 +2,11 @@
 
 Cassandra output plugin for Fluentd.
 
-Implemented using the cassandra-cql gem and targets CQL 3.0.0
+Implemented using the cassandra-cql gem and targets [CQL 3.0.0](http://www.datastax.com/docs/1.1/references/cql/index)
 and Cassandra 1.1.x
 
 # Raison d'être
-Currently, there's another Fluentd Cassandra plugin [see
-here](https://github.com/tomitakazutaka/fluent-plugin-cassandra)
+Currently, there's another [Fluentd Cassandra plugin](https://github.com/tomitakazutaka/fluent-plugin-cassandra)
 
 It's implemented via the Twitter Cassandra gem, which:
 
@@ -30,7 +29,8 @@ via RubyGems
 
     # create table (column family)
       CREATE TABLE events (id varchar, ts bigint, payload text, PRIMARY KEY (id, ts)) WITH CLUSTERING ORDER BY (ts DESC);
-      
+
+    # NOTE: schema definition should match that specified in the Fluentd.conf configuration file
 
 ## Fluentd.conf Configuration
     <match cassandra.**>
@@ -38,17 +38,21 @@ via RubyGems
       host 127.0.0.1             # cassandra hostname.
       port 9160                  # cassandra thrft port.
       keyspace FluentdLoggers    # cassandra keyspace
-      columnfamily events        # cassandra column family
+      columnfamily spec_events   # cassandra column family
       ttl 60                     # cassandra ttl *optional => default is 0*
+      schema                     # cassandra column family schema *hash where keys => column names and values => data types*
+      data_keys                  # comma delimited string of the fluentd hash's keys
+      pop_data_keys              # keep or pop key/values from the fluentd hash when storing it as json
     </match>
 
 # Tests
 
 rake rspec
 
-NOTE: requires that cassandra be installed on the machine running the tests
+    NOTE: requires that cassandra be installed on the machine running the
+          test as well as a keyspace named "FluentdLoggers" and a column family
+          named "spec_events"
 
 # TODOs
     1) make host and port configurable for tests
-    2) make schema definition configurable
-    3) add rake task to generate keyspace and columnfamily
+    2) add rake task to generate keyspace and columnfamily

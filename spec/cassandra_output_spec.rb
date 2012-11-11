@@ -1,24 +1,34 @@
 require 'spec_helper'
 Fluent::Test.setup
 
+SPEC_COLUMN_FAMILY = "spec_events"
+DATA_KEYS = "tag,time"
+
 CONFIG = %[
   host 127.0.0.1
   port 9160
   keyspace FluentdLoggers
-  columnfamily events
+  columnfamily #{SPEC_COLUMN_FAMILY}
+  ttl 0
+  schema {:id => :string, :ts => :bigint, :payload => :string}
+  data_keys #{DATA_KEYS}
+  pop_data_keys true
 ]
 
 describe Fluent::CassandraOutput do
+  include Helpers
+
   let(:driver) { Fluent::Test::BufferedOutputTestDriver.new(Fluent::CassandraOutput, 'test') }
 
   after(:each) do
     d = Fluent::Test::BufferedOutputTestDriver.new(Fluent::CassandraOutput, 'test')
     d.configure(CONFIG)
-    d.instance.connection.execute("TRUNCATE events")
+    d.instance.connection.execute("TRUNCATE #{SPEC_COLUMN_FAMILY}")
   end
 
-  def add_ttl_to_config(ttl)
-    return CONFIG + %[  ttl #{ttl}\n]
+  def set_config_value(config, config_name, value)
+    search_text = config.split("\n").map {|text| text if text.strip!.to_s.start_with? config_name.to_s}.compact![0]
+    config.gsub(search_text, "#{config_name} #{value}")
   end
 
   context 'configuring' do
@@ -29,18 +39,17 @@ describe Fluent::CassandraOutput do
       driver.instance.host.should eq('127.0.0.1')
       driver.instance.port.should eq(9160)
       driver.instance.keyspace.should eq('FluentdLoggers')
-      driver.instance.columnfamily.should eq('events')
+      driver.instance.columnfamily.should eq(SPEC_COLUMN_FAMILY)
       driver.instance.ttl.should eq(0)
     end
 
     it 'should configure ttl' do
       ttl = 20
-      driver.configure(add_ttl_to_config(ttl))
+      driver.configure(set_config_value(CONFIG, :ttl, ttl))
       driver.instance.ttl.should eq(ttl)
     end
 
     describe 'exceptions' do
-
       it 'should raise an exception if host is not configured' do
         expect { driver.configure(CONFIG.gsub("host", "invalid_config_name")) }.to raise_error Fluent::ConfigError
       end
@@ -56,12 +65,11 @@ describe Fluent::CassandraOutput do
       it 'should raise an exception if columnfamily is not configured' do
         expect { driver.configure(CONFIG.gsub("columnfamily", "invalid_config_name")) }.to raise_error Fluent::ConfigError
       end
-
     end
 
-  end
+  end # context configuring
 
-  context 'fluentd logging' do
+  context 'logging' do
 
     it 'should start' do
       driver.configure(CONFIG)
@@ -84,55 +92,67 @@ describe Fluent::CassandraOutput do
       driver.run
     end
 
-    it 'should write' do
-      driver.configure(CONFIG)
-      tag1 = "test1"
-      tag2 = "test2"
-      time1 = Time.now.to_i
-      time2 = Time.now.to_i + 2
-      record1 = {'tag' => tag1, 'time' => time1, 'a' => 10, 'b' => 'Tesla'}
-      record2 = {'tag' => tag2, 'time' => time2, 'a' => 20, 'b' => 'Edison'}
-      records = [record1, record2]
+    context 'writing' do
+      context 'as json' do
 
-      driver.emit(records[0])
-      driver.emit(records[1])
-      driver.run # persists to cassandra
+        describe 'pop no data keys' do
+          it 'should store json in last column' do
+            driver.configure(set_config_value(CONFIG, :pop_data_keys, false))
+            write(driver, SPEC_COLUMN_FAMILY, false)
+          end
+        end
 
-      # query cassandra to verify data was correctly persisted
-      row_num = records.count # non-zero based index
-      events = driver.instance.connection.execute("SELECT * FROM events")
-      events.rows.should eq(records.count)
-      events.fetch do | event | # events should be sorted desc by tag, then time
-        row_num -= 1 # zero-based index
-        hash = event.to_hash
-        hash['id'].should eq(records[row_num]['tag'])
-        hash['ts'].should eq(records[row_num]['time'])
-        hash['payload'].should eq(records[row_num].to_json)
+        describe 'pop some data keys' do
+          it 'should store json in last last column' do
+            driver.configure(set_config_value(CONFIG, :pop_data_keys, true))
+            write(driver, SPEC_COLUMN_FAMILY, false)
+          end
+        end
+
+        describe 'pop all data keys' do
+          it 'should store empty string in last column' do
+            driver.configure(CONFIG)
+            write(driver, SPEC_COLUMN_FAMILY, true)
+          end
+        end
+
+      end # context as json
+
+      context 'as columns' do # no need to test popping of keys b/c it makes no difference
+
+        it 'should write' do
+          config = set_config_value(CONFIG, :data_keys, DATA_KEYS + ',a')
+          config = set_config_value(CONFIG, :pop_data_keys, false)
+          driver.configure(config)
+          write(driver, SPEC_COLUMN_FAMILY, false)
+        end
+
+      end # context as columns  
+
+      it 'should not locate event after ttl has expired' do
+        time = Time.now.to_i
+        tag = "ttl_test"
+        ttl = 1 # set ttl to 1 second
+
+        driver.configure(set_config_value(CONFIG, :ttl, ttl))
+        driver.emit({'tag' => tag, 'time' => time, 'a' => 1})
+        driver.run
+
+        # verify record... should return in less than one sec if hitting
+        #                  cassandra running on localhost
+        events = driver.instance.connection.execute("SELECT * FROM #{SPEC_COLUMN_FAMILY} where ts = #{time}")
+        events.rows.should eq(1)
+
+        # now, sleep long enough for the event to be expired from cassandra
+        sleep(ttl + 1)
+
+        # re-query and verify that no events were returned
+        events = driver.instance.connection.execute("SELECT * FROM #{SPEC_COLUMN_FAMILY} where ts = #{time}")
+        events.rows.should eq(0)
       end
-    end
 
-    it 'should not locate event after ttl has expired' do
-      time = Time.now.to_i
-      tag = "ttl_test"
-      ttl = 1 # set ttl to 1 second
+    end # context writing
 
-      driver.configure(add_ttl_to_config(ttl))
-      driver.emit({'tag' => tag, 'time' => time, 'a' => 1})
-      driver.run
-
-      # verify record... should return in less than one sec if hitting
-      #                  cassandra running on localhost
-      events = driver.instance.connection.execute("SELECT * FROM events where ts = #{time}")
-      events.rows.should eq(1)
-
-      # now, sleep long enough for the event to be expired from cassandra
-      sleep(ttl)
-
-      # re-query and verify that no events were returned
-      events = driver.instance.connection.execute("SELECT * FROM events where ts = #{time}")
-      events.rows.should eq(0)
-    end
-
-  end
+  end # context logging
 
 end # CassandraOutput
