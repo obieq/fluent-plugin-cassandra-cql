@@ -4,8 +4,8 @@ require 'json'
 
 module Fluent
 
-  class CassandraOutput < BufferedOutput
-    Fluent::Plugin.register_output('cassandra-cql', self)
+  class CassandraCqlOutput < BufferedOutput
+    Fluent::Plugin.register_output('cassandra_cql', self)
 
     config_param :host,          :string
     config_param :port,          :integer

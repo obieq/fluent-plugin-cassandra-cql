@@ -15,13 +15,13 @@ CONFIG = %[
   pop_data_keys true
 ]
 
-describe Fluent::CassandraOutput do
+describe Fluent::CassandraCqlOutput do
   include Helpers
 
-  let(:driver) { Fluent::Test::BufferedOutputTestDriver.new(Fluent::CassandraOutput, 'test') }
+  let(:driver) { Fluent::Test::BufferedOutputTestDriver.new(Fluent::CassandraCqlOutput, 'test') }
 
   after(:each) do
-    d = Fluent::Test::BufferedOutputTestDriver.new(Fluent::CassandraOutput, 'test')
+    d = Fluent::Test::BufferedOutputTestDriver.new(Fluent::CassandraCqlOutput, 'test')
     d.configure(CONFIG)
     d.instance.connection.execute("TRUNCATE #{SPEC_COLUMN_FAMILY}")
   end

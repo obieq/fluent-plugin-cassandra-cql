@@ -25,8 +25,8 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "fluent-plugin-cassandra-cql.gemspec",
-    "lib/fluent/plugin/out_cassandra.rb",
-    "spec/cassandra_output_spec.rb",
+    "lib/fluent/plugin/out_cassandra_cql.rb",
+    "spec/cassandra_cql_output_spec.rb",
     "spec/spec.opts",
     "spec/spec_helper.rb",
     "spec/support/helpers.rb"
