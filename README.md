@@ -19,7 +19,7 @@ It's implemented via the Twitter Cassandra gem, which:
 
 via RubyGems
 
-    gem install fluent-plugin-cassandra-cql
+    fluent-gem install fluent-plugin-cassandra-cql
 
 # Quick Start
 
