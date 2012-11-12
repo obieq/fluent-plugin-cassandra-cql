@@ -30,11 +30,11 @@ via RubyGems
     # create table (column family)
       CREATE TABLE events (id varchar, ts bigint, payload text, PRIMARY KEY (id, ts)) WITH CLUSTERING ORDER BY (ts DESC);
 
-    # NOTE: schema definition should match that specified in the Fluentd.conf configuration file
+    # NOTE: schema definition should match that specified in the Fluentd.conf configuration file (see below)
 
 ## Fluentd.conf Configuration
-    <match cassandra.**>
-      type cassandra-cql
+    <match cassandra_cql.**>
+      type cassandra_cql         # fluent output plugin file name (sans fluent_plugin_ prefix)
       host 127.0.0.1             # cassandra hostname.
       port 9160                  # cassandra thrft port.
       keyspace FluentdLoggers    # cassandra keyspace
