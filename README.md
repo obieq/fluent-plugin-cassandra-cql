@@ -56,3 +56,5 @@ rake rspec
 # TODOs
     1) make host and port configurable for tests
     2) add rake task to generate keyspace and columnfamily
+    3) support multiple ip addresses in the connection string for Cassandra multi-node environments
+    4) make the cql version configurable
