@@ -1,4 +1,4 @@
-# Cassandra plugin for Fluentd
+# Cassandra plugin for [Fluentd](http://fluentd.org)
 
 Cassandra output plugin for Fluentd.
 
