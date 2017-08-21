@@ -3,7 +3,7 @@ source "http://rubygems.org"
 # Example:
 #   gem "activesupport", ">= 2.3.5"
 gem "fluentd", ">=0.10.28"
-gem "cassandra-cql", ">=1.1.3"
+gem "cassandra-driver", ">=3.2.0"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
