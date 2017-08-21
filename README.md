@@ -25,10 +25,11 @@ via RubyGems
 
 ## Cassandra Configuration
     # create keyspace (via CQL)
-      CREATE KEYSPACE \"FluentdLoggers\" WITH strategy_class='org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor=1;
+    cqlsh>  CREATE KEYSPACE "FluentdLoggers" WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1};
 
+    cqlsh> USE "FluentdLoggers";
     # create table (column family)
-      CREATE TABLE events (id varchar, ts bigint, payload text, PRIMARY KEY (id, ts)) WITH CLUSTERING ORDER BY (ts DESC);
+    cqlsh>  CREATE TABLE spec_events (id varchar, ts bigint, payload text, PRIMARY KEY (id, ts)) WITH CLUSTERING ORDER BY (ts DESC);
 
     # NOTE: schema definition should match that specified in the Fluentd.conf configuration file (see below)
 
@@ -36,7 +37,7 @@ via RubyGems
     <match cassandra_cql.**>
       type cassandra_cql         # fluent output plugin file name (sans fluent_plugin_ prefix)
       host 127.0.0.1             # cassandra hostname.
-      port 9160                  # cassandra thrft port.
+      port 9042                  # cassandra port.
       keyspace FluentdLoggers    # cassandra keyspace
       columnfamily spec_events   # cassandra column family
       ttl 60                     # cassandra ttl *optional => default is 0*
