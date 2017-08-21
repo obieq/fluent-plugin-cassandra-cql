@@ -1,4 +1,4 @@
-require 'cassandra-cql'
+require 'cassandra'
 require 'msgpack'
 require 'json'
 
@@ -19,8 +19,8 @@ module Fluent
     # for individual columns?
     config_param :pop_data_keys, :bool, :default => true
 
-    def connection
-      @connection ||= get_connection(self.host, self.port, self.keyspace)
+    def session
+      @session ||= get_session(self.host, self.port, self.keyspace)
     end
 
     def configure(conf)
@@ -46,7 +46,7 @@ module Fluent
 
     def start
       super
-      connection
+      session
     end
 
     def shutdown
@@ -63,15 +63,15 @@ module Fluent
         cql = "INSERT INTO #{self.columnfamily} (#{self.schema.keys.join(',')}) " +
                             "VALUES (#{values}) " +
                             "USING TTL #{self.ttl}"
-        @connection.execute(cql)
+        @session.execute(cql)
       }
     end
 
     private
 
-    def get_connection(host, port, keyspace)
-      connection_string = "#{host}:#{port}"
-      ::CassandraCQL::Database.new(connection_string, {:keyspace => "\"#{keyspace}\"", :cql_version => "3.0.0"})
+    def get_session(host, port, keyspace)
+      cluster = ::Cassandra.cluster(hosts: [host], port: port)
+      cluster.connect(keyspace)
     end
 
     def build_insert_values_string(schema_keys, data_keys, record, pop_data_keys)

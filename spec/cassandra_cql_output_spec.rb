@@ -6,7 +6,7 @@ DATA_KEYS = "tag,time"
 
 CONFIG = %[
   host 127.0.0.1
-  port 9160
+  port 9042
   keyspace FluentdLoggers
   columnfamily #{SPEC_COLUMN_FAMILY}
   ttl 0
@@ -23,7 +23,7 @@ describe Fluent::CassandraCqlOutput do
   after(:each) do
     d = Fluent::Test::BufferedOutputTestDriver.new(Fluent::CassandraCqlOutput, 'test')
     d.configure(CONFIG)
-    d.instance.connection.execute("TRUNCATE #{SPEC_COLUMN_FAMILY}")
+    d.instance.session.execute("TRUNCATE #{SPEC_COLUMN_FAMILY}")
   end
 
   def set_config_value(config, config_name, value)
@@ -37,7 +37,7 @@ describe Fluent::CassandraCqlOutput do
       driver.configure(CONFIG)
       driver.tag.should eq('test')
       driver.instance.host.should eq('127.0.0.1')
-      driver.instance.port.should eq(9160)
+      driver.instance.port.should eq(9042)
       driver.instance.keyspace.should eq('FluentdLoggers')
       driver.instance.columnfamily.should eq(SPEC_COLUMN_FAMILY)
       driver.instance.ttl.should eq(0)
@@ -127,7 +127,7 @@ describe Fluent::CassandraCqlOutput do
           write(driver, SPEC_COLUMN_FAMILY, false)
         end
 
-      end # context as columns  
+      end # context as columns
 
       it 'should not locate event after ttl has expired' do
         time = Time.now.to_i
@@ -140,15 +140,15 @@ describe Fluent::CassandraCqlOutput do
 
         # verify record... should return in less than one sec if hitting
         #                  cassandra running on localhost
-        events = driver.instance.connection.execute("SELECT * FROM #{SPEC_COLUMN_FAMILY} where ts = #{time}")
-        events.rows.should eq(1)
+        events = driver.instance.session.execute("SELECT * FROM #{SPEC_COLUMN_FAMILY} where ts = #{time} ALLOW FILTERING")
+        events.rows.size.should eq(1)
 
         # now, sleep long enough for the event to be expired from cassandra
         sleep(ttl + 1)
 
         # re-query and verify that no events were returned
-        events = driver.instance.connection.execute("SELECT * FROM #{SPEC_COLUMN_FAMILY} where ts = #{time}")
-        events.rows.should eq(0)
+        events = driver.instance.session.execute("SELECT * FROM #{SPEC_COLUMN_FAMILY} where ts = #{time} ALLOW FILTERING")
+        events.rows.size.should eq(0)
       end
 
     end # context writing
