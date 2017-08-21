@@ -1,5 +1,5 @@
 module Helpers
-  
+
   def write(driver, column_family_name, tag_and_time_only)
     tag1 = "test1"
     tag2 = "test2"
@@ -23,9 +23,9 @@ module Helpers
 
     # query cassandra to verify data was correctly persisted
     row_num = records.count # non-zero based index
-    events = driver.instance.connection.execute("SELECT * FROM #{column_family_name}")
-    events.rows.should eq(records.count)
-    events.fetch do | event | # events should be sorted desc by tag, then time
+    events = driver.instance.session.execute("SELECT * FROM #{column_family_name}")
+    events.rows.size.should eq(records.count)
+    events.each do | event | # events should be sorted desc by tag, then time
       row_num -= 1 # zero-based index
 
       record = records[row_num]
