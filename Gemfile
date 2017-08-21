@@ -13,4 +13,5 @@ group :development, :test do
   gem "jeweler", ">= 1.8.4"
   gem "rspec", ">= 0"
   gem "simplecov"
+  gem "test-unit", ">= 3.2.0"
 end

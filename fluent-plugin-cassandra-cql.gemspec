@@ -49,6 +49,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>.freeze, [">= 1.8.4"])
       s.add_development_dependency(%q<rspec>.freeze, [">= 0"])
       s.add_development_dependency(%q<simplecov>.freeze, [">= 0"])
+      s.add_development_dependency(%q<test-unit>.freeze, [">= 3.2.0"])
     else
       s.add_dependency(%q<fluentd>.freeze, [">= 0.10.28"])
       s.add_dependency(%q<cassandra-driver>.freeze, [">= 3.2.0"])
@@ -57,6 +58,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>.freeze, [">= 1.8.4"])
       s.add_dependency(%q<rspec>.freeze, [">= 0"])
       s.add_dependency(%q<simplecov>.freeze, [">= 0"])
+      s.add_dependency(%q<test-unit>.freeze, [">= 3.2.0"])
     end
   else
     s.add_dependency(%q<fluentd>.freeze, [">= 0.10.28"])
@@ -66,6 +68,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>.freeze, [">= 1.8.4"])
     s.add_dependency(%q<rspec>.freeze, [">= 0"])
     s.add_dependency(%q<simplecov>.freeze, [">= 0"])
+    s.add_dependency(%q<test-unit>.freeze, [">= 3.2.0"])
   end
 end
 
